@@ -203,7 +203,7 @@ class Client:
     def _callback(self, event, message):
         # TODO: error handling
         for fn in self._registry.get(event, []):
-            fn(message)
+            fn(self, message)
 
 
 # Client for testing things, remove me later
