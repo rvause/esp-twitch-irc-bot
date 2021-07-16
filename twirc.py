@@ -181,9 +181,7 @@ class Client:
         message = Message.from_text(data)
         if message is not None:
             print(message.username, message.action, message.channel, message.content)
-            for tag_name, value in message.tags.items():
-                print(tag_name, ":", value)
-        print(data)
+            self._callback("message", message)  # TODO: add additional callbacks
 
     def register_handler(self, event, fn, unique=False):
         """
@@ -201,6 +199,11 @@ class Client:
 
     def on_message(self, fn, unique=False):
         return self.register_handler("message", fn, unique=unique)
+
+    def _callback(self, event, message):
+        # TODO: error handling
+        for fn in self._registry.get(event, []):
+            fn(message)
 
 
 # Client for testing things, remove me later
