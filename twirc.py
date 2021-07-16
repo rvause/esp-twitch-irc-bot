@@ -6,19 +6,22 @@ from collections import namedtuple
 from conf import settings
 
 
-PING_RE = re.compile("^PING\s:(\w+\.twitch\.tv)")
+PING_RE = re.compile("^PING\ :(\w+\.twitch\.tv)")
 # 1: Username
 # 2: Action/Command
 # 3: Channel
 METADATA_PARSER = re.compile("^([0-9a-zA-Z\_]+)![0-9a-zA-Z\_]+@[0-9a-zA-Z\_]+\.[0-9a-zA-Z]+\.twitch\.tv\ ([0-9a-zA-Z\_]+)\ ([\#0-9a-zA-Z_]+)$")
-TAG_PARSER = re.compile("maybe")
 
 
 def to_bytes(val):
+    if isinstance(val, bytes):
+        return val
     return val.encode("utf-8")
 
 
 def from_bytes(val):
+    if isinstance(val, str):
+        return val
     return val.decode()
 
 
@@ -61,9 +64,9 @@ class Message(BaseMessage):
         Lazy parsing for tags.
 
         """
-        tokens = self.tags_str.split(";")
+        tokens = self.tags_str[1:].split(";")
         self._tags = {
-            k: v
+            k.strip(): v
             for token in tokens
             for k, v in [token.split("=")]
         }
@@ -182,7 +185,7 @@ class Client:
                 print(tag_name, ":", value)
         print(data)
 
-    def regiter_handler(self, event, fn, unique=False):
+    def register_handler(self, event, fn, unique=False):
         """
         Accepts an event and function and registers that function as
         an event handler to be called.
@@ -197,9 +200,9 @@ class Client:
         return fn
 
     def on_message(self, fn, unique=False):
-        return self.regiter_handler("message", fn, unique=unique)
+        return self.register_handler("message", fn, unique=unique)
 
 
 # Client for testing things, remove me later
-client = Client(settings.TWITCH_IRC_TOKEN, settings.TWITCH_NICK, settings.TWITCH_CHANNEL)
+#client = Client(settings.TWITCH_IRC_TOKEN, settings.TWITCH_NICK, settings.TWITCH_CHANNEL)
 #client.connect()
